@@ -1,0 +1,84 @@
+
+<style>
+    /* --- ANIMAÇÕES CUSTOMIZADAS --- */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+        animation: fadeIn 0.8s ease-out; /* Fade in suave ao carregar */
+        overflow: hidden; /* Evita barras de rolagem desnecessárias */
+    }
+
+    /* --- VÍDEO DE FUNDO --- */
+    #bg-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        z-index: -1000;
+        object-fit: cover;
+        
+        /* O segredo para o embaçado: blur maior */
+        filter: blur(10px) brightness(0.7); /* Mais embaçado e um pouco mais escuro */
+        transform: scale(1.1); /* Evita bordas brancas causadas pelo blur */
+    }
+
+    /* Camada escura opcional (overlay) para garantir contraste */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Preto semitransparente */
+        z-index: -999;
+    }
+
+    /* --- CARD DE LOGIN --- */
+    .card {
+        /* Fundo escuro semitransparente (rgba) */
+        background: rgba(15, 15, 15, 0.8) !important; 
+        
+        /* Efeito de vidro fosco (backdrop-filter) */
+        backdrop-filter: blur(10px); 
+        
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Borda sutil e clara */
+        border-radius: 20px;
+    }
+
+    /* Ajuste de cores dos textos dentro do card escuro */
+    .card-header h3 { color: #f8f9fa; }
+    .form-label { color: #f8f9fa; }
+    
+    /* Input com transparência e texto claro */
+    .form-control {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-color: #fff;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+    .form-control::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+    /* Botão customizado (preto e branco) */
+    .btn-black { 
+        background-color: #fff; 
+        color: #1a1a1a; 
+        border: none; 
+        transition: 0.3s;
+    }
+    .btn-black:hover { 
+        background-color: #ccc; 
+        color: #000; 
+        transform: scale(1.02); 
+    }
+</style>

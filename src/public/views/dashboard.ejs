@@ -1,0 +1,314 @@
+<%- include('./partials/header') %>
+
+<style>
+    /* --- TEMA DARK PROFUNDO --- */
+    body {
+        background-color: #0b0b0b;
+        color: #f8f9fa;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard-wrapper {
+        padding-top: 4vh;
+    }
+
+    /* --- QUADRADOS DE INFO --- */
+    .data-square {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        color: white;
+    }
+
+    .data-square:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* --- TABELA ADMIN --- */
+    .admin-table {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .table { color: #ccc; margin-bottom: 0; }
+    .table thead { background: rgba(255, 255, 255, 0.05); color: #fff; }
+    .table td, .table th { border-color: rgba(255, 255, 255, 0.05); padding: 15px 20px; vertical-align: middle; }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    /* --- MODAIS GLASS --- */
+    .modal-content {
+        background: rgba(15, 15, 15, 0.95);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        color: white;
+    }
+    .modal-header { border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 25px; }
+    .modal-footer { border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-radius: 12px;
+        padding: 12px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: none;
+    }
+    .form-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-bottom: 8px; }
+
+    option { background: #1a1a1a; color: white; }
+</style>
+
+<nav class="navbar border-bottom border-secondary mb-4 py-3">
+    <div class="container">
+        <span class="navbar-brand fw-bold" style="letter-spacing: 2px;">CLOUD <span class="text-white-50">ADMIN</span></span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="small text-white-50 d-none d-md-inline">Bem-vindo, Chefe</span>
+            <button onclick="clientLogout()" class="btn btn-sm btn-outline-danger px-3" style="border-radius: 20px;">Sair</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container dashboard-wrapper">
+    
+    <div class="row row-cols-2 row-cols-md-4 g-4 mb-5">
+        <div class="col">
+            <div class="card data-square rounded-4 shadow-sm">
+                <h2 class="fw-bold m-0"><%= totalUsers %></h2>
+                <small class="text-uppercase opacity-50 mt-2">Usuários</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card data-square rounded-4 shadow-sm">
+                <h2 class="fw-bold m-0"><%= totalOrders %></h2>
+                <small class="text-uppercase opacity-50 mt-2">Pedidos</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card data-square rounded-4 shadow-sm">
+                <h2 class="fw-bold m-0 text-warning"><%= pendingOrders.length %></h2>
+                <small class="text-uppercase opacity-50 mt-2">Pendentes</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card data-square rounded-4 shadow-sm">
+                <h2 class="fw-bold m-0 text-success"><%= paidOrders.length %></h2>
+                <small class="text-uppercase opacity-50 mt-2">Pagos</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0 fw-bold">Gestão de Equipe & Produtos</h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-light px-3" data-bs-toggle="modal" data-bs-target="#modalCategoria">+ Categoria</button>
+                    <button class="btn btn-sm btn-light px-3" data-bs-toggle="modal" data-bs-target="#modalProduto">+ Novo Produto</button>
+                </div>
+            </div>
+            
+            <div class="admin-table shadow">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Cargo</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% Users.forEach(user => { %>
+                            <tr>
+                                <td>#<%= user.id %></td>
+                                <td class="text-white fw-semibold"><%= user.name %></td>
+                                <td><%= user.email %></td>
+                                <td>
+                                    <span class="status-badge <%= user.role === 'ADMIN' ? 'bg-primary' : 'bg-secondary' %>">
+                                        <%= user.role %>
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-info me-1 fw-bold text-dark" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEditUser"
+                                            onclick="fillEditModal('<%= user.id %>', '<%= user.name %>', '<%= user.email %>', '<%= user.role %>')">
+                                        Editar
+                                    </button>
+                                    
+                                    <form action="/admin/delete?_method=DELETE" method="POST" style="display: inline;" onsubmit="return confirm('Wendell, tem certeza que deseja excluir este usuário? Essa ação é irreversível.')">
+                                        <input type="hidden" name="id" value="<%= user.id %>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <a href="https://wa.me/5571991067019?text=Help%20Me,%20Wendell" 
+               target="_blank" class="text-white-50 text-decoration-none small">
+                 Precisando de ajuda técnica? <span class="text-success text-decoration-underline">Chamar o Bombeiro (CTO)</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditUser" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold">Configurações de Perfil</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/edit?_method=PUT" method="POST">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="profileId" id="editUserId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nome Completo</label>
+                        <input type="text" name="editName" id="editUserName" class="form-control" placeholder="Nome do usuário" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">E-mail de Acesso</label>
+                        <input type="email" name="editEmail" id="editUserEmail" class="form-control" placeholder="email@exemplo.com" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nova Senha</label>
+                            <input type="password" name="editPass" class="form-control" placeholder="********" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cargo / Nível</label>
+                            <select name="editRole" id="editUserRole" class="form-select">
+                                <option value="USER">USER</option>
+                                <option value="ADMIN">ADMIN</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-info px-4 fw-bold text-dark">Atualizar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Novo Produto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/newproduct" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Produto</label>
+                        <input type="text" name="productName" class="form-control" placeholder="Ex: Script v1" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preço (R$)</label>
+                            <input type="number" step="0.01" name="productPrice" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Estoque</label>
+                            <input type="number" name="productStock" class="form-control" placeholder="99">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Categoria</label>
+                        <select name="productCategory" class="form-select" required>
+                            <option value="" selected disabled>Selecione...</option>
+                            <% allCategories.forEach(category => { %>
+                                <option value="<%= category.id %>"><%= category.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Imagem do Produto</label>
+                        <input type="file" name="productImage" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Sair</button>
+                    <button type="submit" class="btn btn-sm btn-light px-4 fw-bold">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold">Nova Categoria</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/newcategory" method="POST">
+                <div class="modal-body">
+                    <label class="form-label">Nome da Categoria</label>
+                    <input type="text" name="categoryName" class="form-control" placeholder="Ex: Peças" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-sm btn-light w-100">Criar Categoria</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillEditModal(id, name, email, role) {
+        document.getElementById('editUserId').value = id;
+        document.getElementById('editUserName').value = name;
+        document.getElementById('editUserEmail').value = email;
+        document.getElementById('editUserRole').value = role;
+    }
+
+    // Função de Logout Front-end
+    function clientLogout() {
+        if(confirm("Deseja realmente encerrar a sessão?")) {
+            // Limpa o token do localStorage/Session se você estiver usando
+            localStorage.clear();
+            sessionStorage.clear();
+            // Redireciona para o login
+            window.location.href = "/";
+        }
+    }
+</script>
+
+<%- include('./partials/footer') %>

@@ -1,0 +1,225 @@
+<%- include("./partials/header.ejs") %>
+
+<style>
+    /* --- ANIMAÇÕES E BASE --- */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+        animation: fadeIn 0.8s ease-out;
+        background-color: #000;
+        font-family: 'Inter', sans-serif;
+        color: #f8f9fa;
+        overflow-x: hidden;
+    }
+
+    /* --- VÍDEO DE FUNDO --- */
+    #bg-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: -1000;
+        object-fit: cover;
+        filter: blur(10px) brightness(0.4); 
+        transform: scale(1.1);
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -999;
+    }
+
+    /* --- NAVBAR CUSTOMIZADA CLEAN --- */
+    .navbar-cloud {
+        background: rgba(10, 10, 10, 0.8) !important;
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 15px 0;
+    }
+
+    .nav-link-clean {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.7) !important;
+        transition: 0.3s;
+    }
+
+    .nav-link-clean:hover, .nav-link-clean.active {
+        color: #fff !important;
+    }
+
+    .login-btn-minimal {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 6px 18px !important;
+        border-radius: 30px;
+        transition: all 0.4s ease;
+        margin-left: 20px;
+    }
+
+    .login-btn-minimal:hover {
+        color: #fff !important;
+        border-color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- CONTEÚDO --- */
+    .content-section {
+        margin-top: 120px;
+        margin-bottom: 80px;
+    }
+
+    .product-card {
+        background: rgba(20, 20, 20, 0.6) !important;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .product-card:hover {
+        transform: translateY(-12px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6) !important;
+    }
+
+    /* AJUSTE NA IMAGEM DO CARD */
+    .img-wrapper {
+        height: 200px;
+        overflow: hidden;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.02);
+    }
+
+    .img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Mantém a proporção sem amassar */
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .img-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .product-price {
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .btn-buy { 
+        background-color: #fff; 
+        color: #000; 
+        border: none; 
+        font-weight: 600;
+        font-size: 0.8rem;
+        border-radius: 10px;
+        padding: 8px 18px;
+    }
+
+    .btn-buy:hover { background-color: #e0e0e0; }
+</style>
+
+<video autoplay muted loop id="bg-video">
+    <source src="/videos/background.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-cloud fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+            <img src="/imgs/cloudicon.png" alt="Logo" width="35">
+            <span style="letter-spacing: 1px;">CLOUD STORE</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link nav-link-clean active" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-clean" href="#produtos">Produtos</a></li>
+                
+                <% if (typeof role !== 'undefined' && role === 'ADMIN') { %>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-clean text-warning" href="/admin/dashboard">Admin</a>
+                    </li>
+                <% } %>
+
+                <li class="nav-item">
+                    <a class="nav-link login-btn-minimal" href="/login">Entrar</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container content-section">
+    
+    <div class="row mb-5" id="produtos">
+        <div class="col-12 text-center">
+            <h2 class="fw-bold display-5 mb-2">Explore o Futuro</h2>
+            <p class="text-white-50">Produtos selecionados com curadoria Cloud.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <% if (typeof products !== 'undefined' && products.length > 0) { %>
+            <% products.forEach(product => { %>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="p-3">
+                            <div class="img-wrapper">
+                                <% if (product.image) { %>
+                                    <img src="/uploads/<%= product.image %>" alt="<%= product.name %>">
+                                <% } else { %>
+                                    <img src="/imgs/no-image.jpg" alt="Sem imagem">
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column pt-0">
+                            <h6 class="card-title fw-bold text-white mb-2"><%= product.name %></h6>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="product-price">R$ <%= product.price.toLocaleString('pt-br', {minimumFractionDigits: 2}) %></span>
+                                <button class="btn btn-buy">Comprar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-12 text-center py-5">
+                <div class="opacity-25 mb-3" style="font-size: 4rem;">📦</div>
+                <h5 class="text-white-50">Nenhum produto disponível no momento.</h5>
+            </div>
+        <% } %>
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        const video = document.getElementById('bg-video');
+        if (video) video.playbackRate = 0.5;
+    });
+</script>
+
+<%- include("./partials/footer.ejs") %>
