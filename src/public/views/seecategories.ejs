@@ -1,0 +1,169 @@
+<%- include("./partials/header.ejs") %>
+
+<style>
+    /* --- ANIMAÇÕES E BASE --- */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+        animation: fadeIn 0.8s ease-out;
+        background-color: #000;
+        font-family: 'Inter', sans-serif;
+        color: #f8f9fa;
+        overflow-x: hidden;
+    }
+
+    /* --- VÍDEO DE FUNDO (MESMO PADRÃO DO FEED) --- */
+    #bg-video {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: -1000;
+        object-fit: cover;
+        filter: blur(10px) brightness(0.4); 
+        transform: scale(1.1);
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -999;
+    }
+
+    /* --- NAVBAR CUSTOMIZADA --- */
+    .navbar-cloud {
+        background: rgba(10, 10, 10, 0.8) !important;
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 15px 0;
+    }
+
+    .nav-link-clean {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.7) !important;
+        transition: 0.3s;
+    }
+
+    .nav-link-clean:hover, .nav-link-clean.active { color: #fff !important; }
+
+    /* --- CARDS DE CATEGORIA --- */
+    .category-card {
+        background: rgba(20, 20, 20, 0.6) !important;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        height: 100%;
+    }
+
+    .category-card:hover {
+        transform: translateY(-12px);
+        border-color: #0dcaf0; /* Um tom ciano para dar destaque */
+        background: rgba(30, 30, 30, 0.7) !important;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6) !important;
+    }
+
+    .cat-icon {
+        font-size: 2.5rem;
+        color: #0dcaf0;
+        margin-bottom: 15px;
+        transition: 0.4s;
+    }
+
+    .category-card:hover .cat-icon {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 10px rgba(13, 202, 240, 0.5));
+    }
+
+    .cat-title {
+        color: #fff;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .cat-subtitle {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-top: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .content-section { margin-top: 140px; margin-bottom: 80px; }
+</style>
+
+<video autoplay muted loop id="bg-video">
+    <source src="/videos/background.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-cloud fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+            <img src="/imgs/cloudicon.png" alt="Logo" width="35">
+            <span style="letter-spacing: 1px;">CLOUD STORE</span>
+        </a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link nav-link-clean" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-clean active" href="/categories">Categorias</a></li>
+                <li class="nav-item"><a class="nav-link nav-link-clean" href="/login" style="opacity: 0.5;">Entrar</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container content-section">
+    
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h2 class="fw-bold display-5 mb-2 text-uppercase" style="letter-spacing: 3px;">Departamentos</h2>
+            <p class="text-white-50">Navegue por nossas categorias exclusivas.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach(category => { %>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="/products/<%= category.id %>" class="category-card">
+                        <div class="cat-icon">
+                            <i class="bi bi-layers-half"></i> </div>
+                        <h5 class="cat-title"><%= category.name %></h5>
+                        <span class="cat-subtitle">Explorar Arsenal</span>
+                    </a>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-12 text-center py-5">
+                <h5 class="text-white-50">Nenhuma categoria encontrada.</h5>
+            </div>
+        <% } %>
+    </div>
+
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        const video = document.getElementById('bg-video');
+        if (video) video.playbackRate = 0.5; // Slow motion igual ao feed
+    });
+</script>
+
+<%- include("./partials/footer.ejs") %>

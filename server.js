@@ -40,8 +40,6 @@ app.use("/admin",adminRoutes);
 app.use("/user",userRoutes);
 
 
-
-
 app.listen(PORT,()=>{
     console.log(`Aplicação rodando na porta ${PORT}`);
 });
